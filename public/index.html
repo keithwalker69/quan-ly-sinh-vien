@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản lý sinh viên</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 960px; margin: 24px auto; padding: 0 16px; color: #222; }
+    h1 { margin-bottom: 4px; }
+    form, .bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+    input, button { padding: 8px; font: inherit; }
+    button { cursor: pointer; background: #1565c0; color: #fff; border: 0; border-radius: 4px; }
+    button.del { background: #c62828; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+    #msg { color: #c62828; min-height: 1.2em; }
+    #stats { color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Quản lý sinh viên</h1>
+  <div id="stats"></div>
+
+  <form id="form">
+    <input name="maSV" placeholder="Mã SV (SV0004)" required>
+    <input name="hoTen" placeholder="Họ tên" required>
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="lop" placeholder="Lớp">
+    <input name="gpa" type="number" step="0.01" min="0" max="4" placeholder="GPA" required>
+    <button>Thêm</button>
+  </form>
+  <div id="msg"></div>
+
+  <div class="bar"><input id="q" placeholder="Tìm theo tên hoặc mã SV"></div>
+
+  <table>
+    <thead><tr><th>Mã SV</th><th>Họ tên</th><th>Email</th><th>Lớp</th><th>GPA</th><th>Xếp loại</th><th></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    async function load() {
+      const q = encodeURIComponent($('#q').value);
+      const list = await (await fetch('/api/students?q=' + q)).json();
+      $('#rows').innerHTML = list.map((s) => `<tr>
+        <td>${esc(s.maSV)}</td><td>${esc(s.hoTen)}</td><td>${esc(s.email)}</td><td>${esc(s.lop)}</td>
+        <td>${s.gpa}</td><td>${esc(s.xepLoai)}</td>
+        <td><button class="del" data-id="${esc(s.maSV)}">Xóa</button></td></tr>`).join('');
+      const st = await (await fetch('/api/students/stats')).json();
+      $('#stats').textContent = `Tổng: ${st.total} sinh viên · GPA trung bình: ${st.gpaTrungBinh}`;
+    }
+
+    $('#form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+      const res = await fetch('/api/students', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      if (!res.ok) { $('#msg').textContent = (await res.json()).errors.join(', '); return; }
+      $('#msg').textContent = '';
+      e.target.reset();
+      load();
+    });
+
+    $('#rows').addEventListener('click', async (e) => {
+      if (!e.target.dataset.id) return;
+      await fetch('/api/students/' + e.target.dataset.id, { method: 'DELETE' });
+      load();
+    });
+
+    $('#q').addEventListener('input', load);
+    load();
+  </script>
+</body>
+</html>

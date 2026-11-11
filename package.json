@@ -1,0 +1,19 @@
+{
+  "name": "quan-ly-sinh-vien",
+  "version": "1.0.0",
+  "description": "Ứng dụng web quản lý sinh viên (Node.js + Express) dùng cho bài thực hành Jenkins CI",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "node --check src/students.js && node --check src/app.js && node --check src/server.js",
+    "test": "node --test",
+    "test:ci": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=test-results.xml"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.22.3"
+  }
+}
