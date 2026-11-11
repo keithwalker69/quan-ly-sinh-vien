@@ -1,7 +1,7 @@
 # Báo cáo bài thực hành số 2 — Jenkins CI với Docker và GitHub
 
 **Dự án:** Quản lý sinh viên (Node.js + Express)
-**Repository:** `https://github.com/<tai-khoan>/quan-ly-sinh-vien`
+**Repository:** `https://github.com/keithwalker69/quan-ly-sinh-vien`
 **Phương án:** Triển khai Jenkins dưới dạng Docker Container
 
 > Chỗ ghi `📷 Ảnh:` là nơi chèn ảnh chụp màn hình minh chứng.
@@ -79,7 +79,7 @@ Kiểm tra: **Manage Jenkins → Plugins → Installed plugins**.
 3. Phần **Pipeline**:
    - Definition: **Pipeline script from SCM**
    - SCM: **Git**
-   - Repository URL: `https://github.com/<tai-khoan>/quan-ly-sinh-vien.git`
+   - Repository URL: `https://github.com/keithwalker69/quan-ly-sinh-vien.git`
    - Branch: `*/main`
    - Script Path: `Jenkinsfile`
 4. **Save**.
