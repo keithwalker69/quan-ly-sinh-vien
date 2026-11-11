@@ -4,7 +4,7 @@
 **Repository:** `https://github.com/keithwalker69/quan-ly-sinh-vien`
 **Phương án:** Triển khai Jenkins dưới dạng Docker Container
 
-> Chỗ ghi `📷 Ảnh:` là nơi chèn ảnh chụp màn hình minh chứng.
+> Ảnh minh chứng nằm trong thư mục `docs/screenshots/`.
 
 ---
 
@@ -28,7 +28,8 @@ quan-ly-sinh-vien/
 └── package.json
 ```
 
-📷 Ảnh: giao diện ứng dụng tại `http://localhost:3000`
+![00-app-ui](docs/screenshots/00-app-ui.png)
+![00-github-repo](docs/screenshots/00-github-repo.png)
 
 ---
 
@@ -49,8 +50,11 @@ docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 
 Mở `http://localhost:8080` → dán mật khẩu → **Install suggested plugins** → tạo tài khoản admin.
 
-📷 Ảnh: `docker ps` thấy container `jenkins` đang chạy
-📷 Ảnh: màn hình Unlock Jenkins / Dashboard Jenkins
+![01-unlock-jenkins](docs/screenshots/01-unlock-jenkins.png)
+![02-customize-jenkins](docs/screenshots/02-customize-jenkins.png)
+![03-installing-plugins](docs/screenshots/03-installing-plugins.png)
+![04-instance-config](docs/screenshots/04-instance-config.png)
+![05-jenkins-dashboard](docs/screenshots/05-jenkins-dashboard.png)
 
 ---
 
@@ -68,7 +72,9 @@ Các plugin đã cài sẵn qua `plugins.txt`:
 
 Kiểm tra: **Manage Jenkins → Plugins → Installed plugins**.
 
-📷 Ảnh: danh sách plugin đã cài (có JUnit, Git, Pipeline)
+![09-plugin-junit](docs/screenshots/09-plugin-junit.png)
+![09-plugin-git](docs/screenshots/09-plugin-git.png)
+![09-plugin-pipeline](docs/screenshots/09-plugin-pipeline.png)
 
 ---
 
@@ -86,7 +92,8 @@ Kiểm tra: **Manage Jenkins → Plugins → Installed plugins**.
 
 > Nếu repo private: tạo Personal Access Token trên GitHub, thêm vào **Manage Jenkins → Credentials** dạng *Username with password*, rồi chọn credential đó ở bước 3.
 
-📷 Ảnh: cấu hình Pipeline script from SCM
+![06-new-item-pipeline](docs/screenshots/06-new-item-pipeline.png)
+![07-job-config-scm](docs/screenshots/07-job-config-scm.png)
 
 ---
 
@@ -104,7 +111,10 @@ Jenkins tự kiểm tra GitHub khoảng mỗi 2 phút; khi có commit mới sẽ
 
 Lần đầu cần bấm **Build Now** một lần để Jenkins đọc Jenkinsfile và đăng ký trigger.
 
-📷 Ảnh: build được kích hoạt tự động ("Started by an SCM change")
+![07-job-config-trigger](docs/screenshots/07-job-config-trigger.png)
+![12-build3-fixed-build-status](docs/screenshots/12-build3-fixed-build-status.png)
+
+Build #2 và #3 đều ghi **Started by an SCM change**: Jenkins tự phát hiện commit mới, không ai bấm Build Now.
 
 ---
 
@@ -123,7 +133,7 @@ Pipeline gồm các stage:
 
 (Nội dung đầy đủ trong file `Jenkinsfile`.)
 
-📷 Ảnh: Stage View tất cả stage màu xanh
+![10-build1-job-page](docs/screenshots/10-build1-job-page.png)
 
 ---
 
@@ -132,8 +142,8 @@ Pipeline gồm các stage:
 - **Build:** `npm ci` cài đúng phiên bản thư viện trong `package-lock.json`; `npm run lint` kiểm tra cú pháp các file nguồn.
 - **Test:** `node --test` chạy unit test và integration test. Reporter `junit` ghi file `test-results.xml`, plugin JUnit đọc file này và hiển thị **Test Result** + biểu đồ **Test Result Trend** qua các lần build. Coverage được in ra trong Console Output (≈ 99% dòng code).
 
-📷 Ảnh: Console Output phần test (11 pass, bảng coverage)
-📷 Ảnh: trang Test Result (11 tests, 0 failures)
+![10-build1-console](docs/screenshots/10-build1-console.png)
+![10-build1-test-report](docs/screenshots/10-build1-test-report.png)
 
 ---
 
@@ -141,21 +151,37 @@ Pipeline gồm các stage:
 
 ### 8.1 Kết quả build thành công
 
-- Tất cả stage đạt, 11/11 test pass, coverage ≈ 99% dòng.
-- Thời gian một lần chạy: khoảng ___ giây (điền theo thực tế).
+- Build #1 (bấm Build Now lần đầu): **SUCCESS**, tất cả stage đạt.
+- 11/11 test pass; coverage ≈ 99% dòng, ≈ 87% nhánh.
+- Thời gian chạy: khoảng 13 giây.
+
+![10-build1-build-status](docs/screenshots/10-build1-build-status.png)
 
 ### 8.2 Lỗi cố ý: test thất bại
 
 Để kiểm tra Jenkins phát hiện lỗi, nhóm sửa ngưỡng xếp loại trong `src/students.js`:
 
 ```js
-if (gpa >= 3.6) return 'Xuất sắc';   // đổi thành 3.5
+if (gpa > 3.6) return 'Xuất sắc';   // bản lỗi: đổi >= thành >
 ```
 
-Push lên GitHub → Jenkins tự chạy → stage **Test** đỏ, build **FAILURE**. Trang Test Result chỉ rõ test `xepLoai: đúng theo ngưỡng GPA` lỗi, kèm giá trị mong đợi và thực tế. Sửa lại → push → build xanh trở lại.
+Với GPA đúng 3.6, hàm trả về `Giỏi` thay vì `Xuất sắc`.
 
-📷 Ảnh: build đỏ, Test Result báo 1 failure
-📷 Ảnh: build xanh sau khi sửa, biểu đồ Test Result Trend
+> Lần thử đầu nhóm đổi `3.6` thành `3.5` nhưng không test nào bắt được (test không có GPA nằm giữa 3.5 và 3.6). Bài học: test chỉ bắt được lỗi ở những giá trị nó kiểm tra, nên cần test đúng các giá trị biên.
+
+**Build #2** (commit `2b143cc`, Started by an SCM change): stage **Test** đỏ, build **FAILURE**. Console Output và trang Test Result chỉ rõ test `xepLoai: đúng theo ngưỡng GPA` lỗi: mong đợi `'Xuất sắc'`, thực tế `'Giỏi'`.
+
+**Xử lý:** đọc thông báo lỗi → mở `src/students.js` → sửa lại `>= 3.6` → push (commit `5e09731`).
+
+**Build #3** (Started by an SCM change): **SUCCESS**, 11/11 test pass, biểu đồ Test Result Trend thể hiện build #2 đỏ rồi xanh lại.
+
+![11-build2-fail-build-status](docs/screenshots/11-build2-fail-build-status.png)
+![11-build2-fail-console](docs/screenshots/11-build2-fail-console.png)
+![11-build2-fail-test-report](docs/screenshots/11-build2-fail-test-report.png)
+![11-build2-fail-test-failure-detail](docs/screenshots/11-build2-fail-test-failure-detail.png)
+![12-build3-fixed-job-page](docs/screenshots/12-build3-fixed-job-page.png)
+![12-build3-fixed-console](docs/screenshots/12-build3-fixed-console.png)
+![12-build3-fixed-test-report](docs/screenshots/12-build3-fixed-test-report.png)
 
 ### 8.3 Các lỗi thường gặp khi thiết lập và cách xử lý
 
@@ -168,8 +194,6 @@ Push lên GitHub → Jenkins tự chạy → stage **Test** đỏ, build **FAILU
 | `npm ci` lỗi thiếu lock file | Chưa commit `package-lock.json` | Commit `package-lock.json` lên repo |
 | `EADDRINUSE` ở smoke test | Cổng đã bị chiếm | Dùng cổng riêng (`PORT=3100`) |
 | Pipeline không tự chạy | Chưa build lần đầu nên trigger chưa đăng ký | Bấm Build Now một lần |
-
-(Ghi thêm các lỗi thực tế nhóm gặp, kèm ảnh.)
 
 ---
 
