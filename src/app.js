@@ -13,7 +13,7 @@ function createApp(store = createStore(SEED)) {
   app.use(express.json());
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
-  app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+  app.get('/api/health', (req, res) => res.json({ status: 'ok', pod: require('os').hostname() }));
 
   app.get('/api/students', (req, res) => res.json(store.list(req.query)));
 

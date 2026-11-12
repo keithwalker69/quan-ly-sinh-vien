@@ -18,7 +18,7 @@ const json = (method, body) => ({ method, headers: { 'Content-Type': 'applicatio
 
 test('GET /api/health', async () => {
   const res = await fetch(`${base}/health`);
-  assert.deepStrictEqual(await res.json(), { status: 'ok' });
+  assert.strictEqual((await res.json()).status, 'ok');
 });
 
 test('GET /api/students trả về dữ liệu mẫu', async () => {
